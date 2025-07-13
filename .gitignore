@@ -1,0 +1,5 @@
+*.bak
+/dist
+/build
+/system
+/temp

@@ -13,9 +13,9 @@ Ejemplo de `launcher.json`:
 ```json
 {
   "LauncherTitle": "Lineage 2 - CT-0 High Five",
-  "NewsUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS5gBONA1AZeMsrlHrjKbmLmDew5E--s-ksdcyWznRM6hpMWtgfr5n2HSjXaDtDaOYOBY4iBnWX8QMb/pub?gid=0&single=true&output=csv",
+  "NewsUrl": "https://tu-url-de-noticias.com/noticias.csv",
   "LauncherVersion": "1.1",
-  "VersionJsonUrl": "https://github.com/davidHdezLemus/Lineage2/raw/refs/heads/main/version.json",
+  "VersionJsonUrl": "https://tu-url.com/version.json",
   "StartFile": "l2.exe"
 }
 ```
@@ -25,10 +25,11 @@ El archivo `version.json` remoto (en GitHub) debe tener la siguiente estructura:
 {
   "launcher": {
     "version": "1.1",
-    "url": "https://mega.nz/file/SAwCDRpS#FOroYXr4TjBwuWp8lMrcsXcRY7SPjxknqrgFBoDl3Eo"
+    "url": "https://tu-url.com/launcher.exe"
   },
   "system": {
     "version": "1.0.1",
+    "url": "https://tu-url.com/system.zip"
     "url": "https://github.com/davidHdezLemus/Lineage2/raw/refs/heads/main/system.zip"
   }
 }
