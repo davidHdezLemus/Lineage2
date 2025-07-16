@@ -1,138 +1,129 @@
-# Lineage 2 Launcher - CT-0 High Five
+# Lineage 2 - Modern Python Launcher
 
-Este launcher gestiona la actualización y el inicio del cliente Lineage 2 de forma automática y sencilla, con soporte multi-idioma (español/inglés) y mensajes de estado claros para el usuario.
+Un lanzador de juegos moderno y auto-actualizable para Lineage 2, construido con Python y PyQt5. Este proyecto proporciona una base sólida y fácil de mantener para lanzar y actualizar un cliente de juego, con una arquitectura modular y limpia.
+
+![Launcher Screenshot](src/assets/banner.png)
 
 ---
 
-## Contenido del proyecto
+## ✨ Características
 
-- `launcher.py` — Script principal del launcher (PyQt5). **Debe estar presente tanto para desarrollo como para el empaquetado con PyInstaller.**
-- `launcher.json` — Configuración del launcher (título, URLs, ejecutable, versión local, URL del version.json remoto).
+- **Auto-Actualización**: El lanzador comprueba si hay nuevas versiones de sí mismo y de los archivos del sistema del juego.
+- **Interfaz Gráfica Moderna**: Interfaz de usuario limpia y atractiva construida con PyQt5.
+- **Noticias del Servidor**: Muestra las últimas noticias cargadas desde una hoja de cálculo de Google.
+- **Soporte Multi-idioma**: Fácilmente extensible para soportar múltiples idiomas (actualmente Español e Inglés).
+- **Arquitectura Modular**: El código está separado en servicios (actualizaciones, noticias, idioma, juego) y UI, lo que facilita su mantenimiento y expansión.
+- **Empaquetado Sencillo**: Incluye un archivo `.spec` para PyInstaller que facilita la creación de un ejecutable `.exe` de un solo archivo.
 
-Ejemplo de `launcher.json`:
-```json
-{
-  "LauncherTitle": "Lineage 2 - CT-0 High Five",
-  "NewsUrl": "https://tu-url-de-noticias.com/noticias.csv",
-  "LauncherVersion": "1.1",
-  "VersionJsonUrl": "https://tu-url.com/version.json",
-  "StartFile": "l2.exe"
+---
+
+## 📂 Estructura del Proyecto
+
+El proyecto sigue una arquitectura limpia para separar las responsabilidades:
+
+- **`src/`**: Contiene todo el código fuente de la aplicación.
+  - **`main.py`**: El punto de entrada de la aplicación. Orquesta la UI y los servicios.
+  - **`config/`**: Contiene la configuración estática de la aplicación (`config.py`).
+  - **`core/`**: Lógica de bajo nivel, como el `SystemManager` para interactuar con los archivos del juego.
+  - **`services/`**: Lógica de negocio (actualizador, noticias, idioma, lanzamiento del juego).
+  - **`ui/`**: Define la interfaz de usuario (`launcher_ui.py`).
+  - **`utils/`**: Utilidades compartidas, como el manejo de `resource_path`.
+  - **`assets/`**: Todos los recursos gráficos (imágenes, iconos).
+- **`package.spec`**: Archivo de configuración para PyInstaller para construir el ejecutable.
+- **`requirements.txt`**: Lista de dependencias de Python.
+
+---
+
+## 🚀 Instalación y Uso
+
+### 1. Prerrequisitos
+
+- Python 3.8 o superior.
+- `pip` para instalar paquetes.
+
+### 2. Instalación de Dependencias
+
+Clona el repositorio y navega hasta el directorio del proyecto. Luego, instala las dependencias:
+
+```sh
+pip install -r requirements.txt
+```
+
+### 3. Configuración
+
+Edita el archivo `src/config/config.py` para ajustar los parámetros del lanzador:
+
+```python
+# src/config/config.py
+CONFIG = {
+    "LauncherVersion": "1.2", # Cambia esto para forzar una actualización del lanzador
+    "LauncherTitle": "Lineage 2 - CT-0 High Five",
+    "NewsUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1v.../pub?output=csv",
+    "VersionJsonUrl": "https://github.com/user/repo/raw/main/version.json",
+    "StartFile": "l2.exe"
 }
 ```
 
-El archivo `version.json` remoto (en GitHub) debe tener la siguiente estructura:
+Asegúrate de que tu `VersionJsonUrl` apunte a un archivo `version.json` con la siguiente estructura:
+
 ```json
 {
   "launcher": {
-    "version": "1.1",
-    "url": "https://tu-url.com/launcher.exe"
+    "version": "1.2",
+    "url": "https://github.com/user/repo/raw/main/dist/Lineage2_Launcher.exe"
   },
   "system": {
-    "version": "1.0.1",
-    "url": "https://tu-url.com/system.zip"
-    "url": "https://github.com/davidHdezLemus/Lineage2/raw/refs/heads/main/system.zip"
+    "version": "1.0.2",
+    "url": "https://github.com/user/repo/raw/main/system.zip"
   }
 }
 ```
 
-- `requirements.txt` — Dependencias Python necesarias.
-- Carpeta `assets/` — Recursos gráficos (icono, imágenes, etc).
-- **NO incluir** `settings.ini` en el bundle: este archivo se genera automáticamente en `system/` al cambiar el idioma.
+### 4. Ejecutar en Modo Desarrollo
+
+Para probar el lanzador sin compilarlo, ejecuta:
+
+```sh
+python src/main.py
+```
 
 ---
 
-## Instalación, desarrollo y empaquetado
+## 📦 Compilar el Ejecutable
 
-1. **Instala las dependencias:**
-   ```sh
-   pip install -r requirements.txt
-   pip install pyinstaller
-   ```
+Para crear un único archivo `.exe` para distribución, usa PyInstaller con el archivo `.spec` proporcionado.
 
-2. **Modo desarrollo:**
-   - Ejecuta `python launcher.py` para probar el launcher sin empaquetar.
-   - Si hay una actualización del launcher, el nuevo `.exe` se descargará en la carpeta `temp/` del proyecto y **no se reemplazará nada automáticamente**.
-   - Se mostrará un mensaje con la ruta del archivo descargado para pruebas manuales.
+1.  **Instala PyInstaller:**
+    ```sh
+    pip install pyinstaller
+    ```
 
-3. **Empaqueta el launcher en un solo ejecutable (comando directo):**
-   ```sh
-   pyinstaller --onefile --noconsole --icon=assets/icon.ico --add-data "assets;assets" --add-data "launcher.json;." --add-data "requirements.txt;." launcher.py
-   ```
-   - El ejecutable aparecerá en la carpeta `dist/`.
-   - Copia (si existe) tu archivo `settings.ini` junto al `.exe` para conservar la configuración de idioma.
+2.  **Ejecuta PyInstaller:**
+    ```sh
+    pyinstaller package.spec
+    ```
+
+3.  **Encuentra tu ejecutable:**
+    El archivo `Lineage2_Launcher.exe` estará en la carpeta `dist/`. ¡Listo para distribuir!
 
 ---
 
-### Empaquetado avanzado usando `launcher.spec`
+## 🤝 Cómo Contribuir
 
-Si prefieres mayor control o personalización, puedes empaquetar usando el archivo `launcher.spec` incluido en el proyecto. Este archivo ya incluye la configuración para añadir la carpeta `assets/`, el `launcher.json`, el `requirements.txt` y el icono.
+¡Las contribuciones son bienvenidas! Si quieres mejorar este lanzador, por favor sigue estos pasos:
 
-1. Asegúrate de tener las dependencias instaladas:
-   ```sh
-   pip install -r requirements.txt
-   pip install pyinstaller
-   ```
-
-2. Empaqueta usando el archivo `.spec`:
-   ```sh
-   pyinstaller launcher.spec
-   ```
-
-   - El ejecutable aparecerá en la carpeta `dist/` con todos los recursos necesarios.
-   - Puedes editar el `.spec` si necesitas añadir más archivos o cambiar el nombre del ejecutable.
-
-> **Nota:** Usar el `.spec` es equivalente a pasar los argumentos manualmente, pero es más flexible para proyectos grandes o si necesitas personalizar la distribución.
-
-4. **Modo producción (usuario final):**
-   - Ejecuta `Launcher.exe`.
-   - Si hay una actualización del launcher, el `.exe` se descargará y el reemplazo será automático mediante un script `.bat`.
-
-5. **Estructura de distribución recomendada:**
-   ```
-   dist/
-     ├─ Launcher.exe
-     ├─ launcher.py        # (solo necesario para desarrollo o recompilación)
-     ├─ launcher.json
-     ├─ requirements.txt
-     ├─ assets/
-     │    └─ icon.ico, ...
-     └─ settings.ini  (opcional, generado tras primer uso)
-   ```
+1.  **Haz un Fork** del repositorio.
+2.  **Crea una nueva rama** para tu característica (`git checkout -b feature/nueva-caracteristica`).
+3.  **Haz tus cambios** y haz commit (`git commit -am 'Añade nueva característica'`).
+4.  **Sube tus cambios** a tu fork (`git push origin feature/nueva-caracteristica`).
+5.  **Abre un Pull Request**.
 
 ---
 
-## Flujo de actualización automática
+## 📄 Licencia
 
-- El launcher lee la versión local y la URL del archivo remoto desde `launcher.json`.
-- Descarga el `version.json` remoto y compara versiones:
-  - Si hay una versión nueva del launcher:
-    - **Modo developer:** descarga el `.exe` en `./temp/` y muestra la ruta.
-    - **Modo producción:** descarga el `.exe` y ejecuta un `.bat` para reemplazar el actual automáticamente.
-  - Si hay una nueva versión del system, descarga y reemplaza la carpeta `system/`.
+Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` para más detalles.
 
----
+## 👨‍💻 Desarrollado por
 
-## Personalización y configuración
-
-- Edita `launcher.json` para cambiar URLs, título, versión local, URL de actualizaciones o el ejecutable a lanzar.
-- El archivo `settings.ini` almacena solo la preferencia de idioma y se puede borrar para restablecer.
-- Puedes personalizar el icono cambiando `assets/icon.ico` y recompilando.
-
----
-
-## Notas técnicas
-
-- El launcher es compatible con Windows y empaquetado con PyInstaller.
-- Todos los recursos se acceden correctamente tanto en desarrollo como en ejecutable gracias a la función `resource_path`.
-- El archivo `settings.ini` **no debe incluirse** en el bundle para que el usuario conserve su configuración entre versiones.
-- Si ves errores de permisos al iniciar el juego, marca el ejecutable como "Ejecutar como administrador".
-
----
-
-## Créditos
-
-Desarrollado por David Hdez Lemus y colaboradores. Basado en PyQt5 y Python 3.8+.
-
----
-
-¿Dudas o sugerencias? Abre un issue en el repositorio o contacta al desarrollador.
+-   **David Hdez Lemus** y colaboradores.
