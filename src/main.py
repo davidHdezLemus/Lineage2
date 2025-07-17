@@ -1,13 +1,62 @@
 import sys
 import os
-from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5 import QtWidgets, QtGui, QtCore, QtSvg
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtWidgets import QSplashScreen, QApplication
 
+# Función auxiliar para obtener rutas de recursos
+def resource_path(relative_path):
+    """Obtiene la ruta absoluta al recurso, funciona para desarrollo y para PyInstaller"""
+    if hasattr(sys, '_MEIPASS'):
+        # PyInstaller crea una carpeta temporal y almacena la ruta en _MEIPASS
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
+# Configuración inicial de la aplicación
+app = QApplication(sys.argv)
+
+# Crear y mostrar el splash screen
+def show_splash():
+    try:
+        splash_pix = QtGui.QPixmap(resource_path('assets/loading.png'))
+        if splash_pix.isNull():
+            # Si no se puede cargar la imagen, crear un splash screen simple
+            splash = QSplashScreen(Qt.white)
+            splash.showMessage(
+                "Cargando...", 
+                Qt.AlignBottom | Qt.AlignHCenter, 
+                Qt.black
+            )
+        else:
+            splash = QSplashScreen(splash_pix, Qt.WindowStaysOnTopHint)
+            splash.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
+            splash.setEnabled(False)
+            splash.showMessage(
+                "Cargando...", 
+                Qt.AlignBottom | Qt.AlignHCenter, 
+                Qt.white
+            )
+        
+        splash.show()
+        app.processEvents()
+        return splash
+    except Exception as e:
+        print(f"Error mostrando splash screen: {str(e)}")
+        # Retornar None si hay algún error
+        return None
+
+# Mostrar el splash screen lo antes posible
+splash = show_splash()
+
+# Importaciones pesadas después de mostrar el splash
 from core.updater import Updater
 from config.config import CONFIG
 from services.news import NewsService
 from services.game import GameService
 from utils.locale import LocaleService, LANGS
-from ui.launcher_ui import LauncherUI, resource_path
+from ui.launcher_ui import LauncherUI
 
 class Launcher(QtWidgets.QWidget):
     def __init__(self):
@@ -110,7 +159,15 @@ class Launcher(QtWidgets.QWidget):
 
 
 if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
-    launcher = Launcher()
-    launcher.show()
-    sys.exit(app.exec_())
+    try:
+        launcher = Launcher()
+        launcher.show()
+        # Cerrar el splash screen cuando la ventana principal esté lista
+        if splash is not None:
+            splash.finish(launcher)
+        sys.exit(app.exec_())
+    except Exception as e:
+        print(f"Error al iniciar la aplicación: {str(e)}")
+        if splash is not None:
+            splash.close()
+        sys.exit(1)
