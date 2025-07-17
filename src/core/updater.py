@@ -7,12 +7,28 @@ import sys
 from typing import Dict, Optional, Callable
 from core.system import SystemManager
 from PyQt5 import QtWidgets
+
+def get_base_path():
+    """Get the base path for the application."""
+    if getattr(sys, 'frozen', False):
+        # Running as compiled executable
+        return os.path.dirname(sys.executable)
+    else:
+        # Running as a script
+        return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
  
 class Updater:
     def __init__(self, config: Dict):
         self.config = config
         self.status = None
-        self.system_manager = SystemManager(os.path.join(os.getcwd(), 'system'))
+        base_path = get_base_path()
+        system_path = os.path.join(base_path, 'system')
+        self.system_manager = SystemManager(system_path)
+        
+        # Debug: Print paths
+        if self.status:
+            self.status(f'Ruta base: {base_path}')
+            self.status(f'Ruta del sistema: {system_path}')
 
     def check_updates(self, status_callback: callable) -> bool:
         """
